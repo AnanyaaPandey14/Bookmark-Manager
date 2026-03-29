@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark Saver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .bookmark {
+            background: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #667eea;
+        }
+
+        .info {
+            flex: 1;
+        }
+
+        .name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .url {
+            font-size: 11px;
+            color: #667eea;
+        }
+
+        .actions button {
+            width: auto;
+            padding: 4px 10px;
+            margin-left: 5px;
+        }
+
+        .visit { background: #28a745; }
+        .delete { background: #dc3545; }
+        .empty { text-align: center; color: #999; padding: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔖 Bookmark Saver</h1>
+        
+        <input type="text" id="siteName" placeholder="Site Name">
+        <input type="text" id="siteUrl" placeholder="Site URL">
+        <button id="saveBtn">Save Bookmark</button>
+        
+        <h2>📚 Your Bookmarks</h2>
+        <div id="bookmarks"></div>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('siteName');
+        const urlInput = document.getElementById('siteUrl');
+        const saveBtn = document.getElementById('saveBtn');
+        const bookmarksDiv = document.getElementById('bookmarks');
+
+        loadBookmarks();
+        saveBtn.onclick = saveBookmark;
+
+        function saveBookmark() {
+            const name = nameInput.value.trim();
+            let url = urlInput.value.trim();
+            
+            if (!name || !url) {
+                alert('Please fill both fields');
+                return;
+            }
+            
+            if (!url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+            
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            bookmarks.push({ id: Date.now(), name, url });
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            
+            nameInput.value = '';
+            urlInput.value = '';
+            loadBookmarks();
+            alert('Bookmark saved!');
+        }
+
+        function loadBookmarks() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            bookmarksDiv.innerHTML = '';
+            
+            if (bookmarks.length === 0) {
+                bookmarksDiv.innerHTML = '<div class="empty">No bookmarks yet</div>';
+                return;
+            }
+            
+            bookmarks.forEach(b => {
+                const div = document.createElement('div');
+                div.className = 'bookmark';
+                div.innerHTML = `
+                    <div class="info">
+                        <div class="name">${b.name}</div>
+                        <div class="url">${b.url}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="visit" onclick="visit('${b.url}')">Visit</button>
+                        <button class="delete" onclick="remove(${b.id})">Delete</button>
+                    </div>
+                `;
+                bookmarksDiv.appendChild(div);
+            });
+        }
+
+        function visit(url) {
+            window.open(url, '_blank');
+        }
+
+        function remove(id) {
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            bookmarks = bookmarks.filter(b => b.id !== id);
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            loadBookmarks();
+            alert('Bookmark deleted!');
+        }
+    </script>
+</body>
+</html>git
